@@ -14,6 +14,7 @@ const checkSession = async () =>{
     try {
         const {data} = await api.get("/api/auth/me");
         // setUser(data.user);
+        
     } catch(error){
         setUser(null)
     }finally{
