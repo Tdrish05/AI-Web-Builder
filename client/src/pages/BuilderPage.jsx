@@ -2,9 +2,7 @@ import React from 'react'
 
 const BuilderPage = () => {
   return (
-    <div>
-      
-    </div>
+    <div>BuilderPage</div>
   )
 }
 
