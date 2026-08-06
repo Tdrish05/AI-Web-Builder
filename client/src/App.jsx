@@ -1,10 +1,11 @@
 import React, { createContext, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom"
 import { GuestLayout, AuthLayout } from "./pages/Layout";
 import AuthPage from "./pages/AuthPage";
 import Homepage from "./pages/HomePage";
 import BuilderPage from "./pages/BuilderPage";
 import PreviewPage from "./pages/PreviewPage";
+
 
 const App = () => {
   return (
