@@ -31,7 +31,7 @@ export function AppContextProvider({ children }) {
   const [showCode, setShowCode] = useState(false);
 
   // Auth actions
-  const checkSession = async () => {
+  const checkSession = useCallback(async () => {
     try {
       const { data } = await api.get("/api/auth/me");
       setUser(data.user);
@@ -40,11 +40,11 @@ export function AppContextProvider({ children }) {
     } finally {
       setLoadingUser(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkSession();
-  }, []);
+  }, [checkSession]);
 
   const login = async (email, password) => {
     try {
@@ -93,9 +93,10 @@ export function AppContextProvider({ children }) {
   };
 
   // Projects Actions
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     if (!user) return;
     try {
+      setLoadingProjects(true);
       const { data } = await api.get("/api/projects");
       setProjects(data);
     } catch (err) {
@@ -104,11 +105,16 @@ export function AppContextProvider({ children }) {
     } finally {
       setLoadingProjects(false);
     }
-  };
+  }, [user]);
 
   const loadProject = useCallback(
     async (id, silent = false) => {
-      if (!user) return;
+      // FIX: Ensure we don't stay stuck in a loading state if user is missing
+      if (!user) {
+        if (!silent) setLoadingActiveProject(false);
+        return;
+      }
+      
       if (!silent) setLoadingActiveProject(true);
 
       try {
@@ -147,7 +153,7 @@ export function AppContextProvider({ children }) {
     }
   };
 
-  // Poll active project status
+  // Poll active project status if pending/generating/revising
   useEffect(() => {
     if (!activeProject?._id || !user) return;
 
@@ -217,6 +223,7 @@ export function AppContextProvider({ children }) {
     [activeProject, user],
   );
 
+  // Debounced API call for file saving
   const debouncedSave = useMemo(
     () =>
       debounce(async (files, id) => {
@@ -232,7 +239,7 @@ export function AppContextProvider({ children }) {
 
   useEffect(() => {
     return () => {
-      debouncedSave.cancel();
+      debouncedSave.flush();
     };
   }, [debouncedSave]);
 
@@ -240,37 +247,61 @@ export function AppContextProvider({ children }) {
     async (files) => {
       if (!activeProject || !user) return;
 
+      // Optimistically update local state so UI reacts instantly
+      setActiveProject((prev) => (prev ? { ...prev, files } : prev));
+
+      // Save to backend with debounce
       debouncedSave(files, activeProject._id);
     },
     [activeProject, user, debouncedSave],
   );
 
+  // Memoize Context Value to prevent unnecessary re-render cascades
+  const contextValue = useMemo(
+    () => ({
+      user,
+      loadingUser,
+      login,
+      register,
+      logout,
+      projects,
+      loadingProjects,
+      activeProject,
+      loadingActiveProject,
+      chatLoading,
+      generatingProject,
+      activeFile,
+      setActiveFile,
+      showCode,
+      setShowCode,
+      loadProjects,
+      loadProject,
+      handleGenerate,
+      handleDelete,
+      updateProjectFiles,
+      sendChatMessage: handleChat,
+    }),
+    [
+      user,
+      loadingUser,
+      projects,
+      loadingProjects,
+      activeProject,
+      loadingActiveProject,
+      chatLoading,
+      generatingProject,
+      activeFile,
+      showCode,
+      loadProjects,
+      loadProject,
+      handleGenerate,
+      updateProjectFiles,
+      handleChat,
+    ],
+  );
+
   return (
-    <AppContext.Provider
-      value={{
-        user,
-        loadingUser,
-        login,
-        register,
-        logout,
-        projects,
-        loadingProjects,
-        activeProject,
-        loadingActiveProject,
-        chatLoading,
-        generatingProject,
-        activeFile,
-        setActiveFile,
-        showCode,
-        setShowCode,
-        loadProjects,
-        loadProject,
-        handleGenerate,
-        handleDelete,
-        updateProjectFiles,
-        sendChatMessage: handleChat,
-      }}
-    >
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );
