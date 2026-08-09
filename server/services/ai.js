@@ -1,4 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import pMap from "p-map";
 import {
@@ -19,6 +20,11 @@ import {
 
 // Helper to dynamically instantiate model with current environment variables
 function getModel() {
+  if (process.env.GEMINI_API_KEY) {
+    const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+    return google(modelName);
+  }
+
   const modelName = process.env.OPENROUTER_MODEL || "openrouter/free";
   const openrouter = createOpenAI({
     baseURL: "https://openrouter.ai/api/v1",
