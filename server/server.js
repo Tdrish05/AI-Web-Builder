@@ -26,15 +26,6 @@ app.use((err, _req, res, _next) => {
     error: err.message
   });
 });
-
-
-
-
-
-
-
-
-
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
