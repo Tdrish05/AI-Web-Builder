@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { google } from "@ai-sdk/google";
+import { createGoogle } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import pMap from "p-map";
 import {
@@ -23,9 +23,14 @@ import {
 //           2. Groq API (Free 1000+ req/day at https://console.groq.com/)
 //           3. OpenRouter API
 function getModel() {
-  if (process.env.GEMINI_API_KEY) {
-    const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
-    return google(modelName);
+  const geminiKey =
+    process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (geminiKey) {
+    const googleProvider = createGoogle({
+      apiKey: geminiKey,
+    });
+    const modelName = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+    return googleProvider(modelName);
   }
 
   if (process.env.GROQ_API_KEY) {
