@@ -159,13 +159,18 @@ async function runBackgroundGeneration(projectId, prompt) {
       err,
     );
 
+    let friendlyError = err.message || "Failed to generate project";
+    if (err.message?.includes("Rate limit exceeded") || err.message?.includes("free-models-per-day")) {
+      friendlyError = "OpenRouter daily free quota reached (50 requests/day). Add a free GEMINI_API_KEY from https://aistudio.google.com/ to your server/.env for 1,500 free generations/day!";
+    }
+
     await Project.findByIdAndUpdate(projectId, {
       status: "failed",
-      error: err.message,
+      error: friendlyError,
       $push: {
         messages: {
           role: "assistant",
-          content: `Generation failed: ${err.message}`,
+          content: `Generation failed: ${friendlyError}`,
           timestamp: new Date(),
         },
       },
