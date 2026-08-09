@@ -19,10 +19,22 @@ import {
 } from "./codeValidator.js";
 
 // Helper to dynamically instantiate model with current environment variables
+// Supports: 1. Google Gemini API (Free 1500 req/day at https://aistudio.google.com/)
+//           2. Groq API (Free 1000+ req/day at https://console.groq.com/)
+//           3. OpenRouter API
 function getModel() {
   if (process.env.GEMINI_API_KEY) {
     const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
     return google(modelName);
+  }
+
+  if (process.env.GROQ_API_KEY) {
+    const modelName = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+    const groq = createOpenAI({
+      baseURL: "https://api.groq.com/openai/v1",
+      apiKey: process.env.GROQ_API_KEY,
+    });
+    return groq(modelName);
   }
 
   const modelName = process.env.OPENROUTER_MODEL || "openrouter/free";
