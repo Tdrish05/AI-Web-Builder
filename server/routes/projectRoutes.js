@@ -7,7 +7,7 @@ import {
   listProjects,
   publishProject,
   updateProjectFiles,
-} from "../controllers/projectController.js";
+} from "../Controllers/projectController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { chat } from "../Controllers/chatController.js";
 
