@@ -126,10 +126,10 @@ const HomePage = () => {
             />
           </div>
 
-          {/* Horizontal Scroll Tags on Mobile / Flex center on Desktop */}
-          <div className="w-full mt-4 max-w-2xl overflow-x-auto hide-scrollbar py-1 px-2 select-none">
-            <div className="flex gap-2 sm:gap-3 flex-nowrap md:flex-wrap md:justify-center">
-              {homeTags.map((tag, i) => (
+          {/* Infinite Moving Marquee Tags */}
+          <div className="masked-marquee w-full mt-4 max-w-2xl overflow-hidden py-1 select-none">
+            <div className="flex animate-marquee gap-3 flex-nowrap">
+              {[...homeTags, ...homeTags, ...homeTags].map((tag, i) => (
                 <button
                   key={i}
                   onClick={() => handleGenerate(tag)}
