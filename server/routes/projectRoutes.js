@@ -7,9 +7,9 @@ import {
   listProjects,
   publishProject,
   updateProjectFiles,
-} from "../Controllers/projectController.js";
+} from "../controllers/projectController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { chat } from "../Controllers/chatController.js";
+import { chat } from "../controllers/chatController.js";
 
 const projectRouter = Router();
 
