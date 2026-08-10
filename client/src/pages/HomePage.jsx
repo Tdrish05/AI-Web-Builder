@@ -69,10 +69,10 @@ const HomePage = () => {
             AI Web Builder
           </span>
         </div>
-        <div className={`flex items-center gap-3 text-sm font-medium ${
+        <div className={`flex items-center gap-2 sm:gap-3 text-sm font-medium ${
           theme === "dark" ? "text-zinc-300" : "text-zinc-700"
         }`}>
-          <span>{user?.name}</span>
+          <span className="hidden sm:inline">{user?.name}</span>
 
           <button
             onClick={toggleTheme}
@@ -104,7 +104,7 @@ const HomePage = () => {
         <div className="w-full max-w-2xl flex flex-col items-center">
 
           {/* Title */}
-          <h1 className="text-center text-4xl md:text-6xl font-medium mt-4 max-w-2xl">
+          <h1 className="text-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium mt-4 max-w-2xl leading-tight">
             Let's build your app together
           </h1>
 
@@ -126,9 +126,9 @@ const HomePage = () => {
             />
           </div>
 
-          {/* Scrolling Marquee tags */}
-          <div className="masked-marquee w-full mt-4 max-w-2xl overflow-hidden py-1">
-            <div className="flex animate-marquee gap-3">
+          {/* Horizontal Scroll Tags on Mobile / Flex center on Desktop */}
+          <div className="w-full mt-4 max-w-2xl overflow-x-auto hide-scrollbar py-1 px-2 select-none">
+            <div className="flex gap-2 sm:gap-3 flex-nowrap md:flex-wrap md:justify-center">
               {homeTags.map((tag, i) => (
                 <button
                   key={i}

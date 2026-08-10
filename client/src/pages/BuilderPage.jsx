@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { useNavigate, useParams } from "react-router-dom";
-import { Loader2Icon, MessageSquareIcon, FolderTreeIcon } from "lucide-react";
+import { Loader2Icon, MessageSquareIcon, FolderTreeIcon, EyeIcon } from "lucide-react";
 import toast from "react-hot-toast";
 
 import BuilderHeader from "../components/BuilderHeader";
@@ -119,17 +119,57 @@ const BuilderPage = () => {
         onBack={() => navigate("/")}
         onLogout={logout}
       />
+      {/* Mobile Tab Switcher (Visible on mobile/tablet, hidden on desktop) */}
+      <div className="lg:hidden flex border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30">
+        <button
+          onClick={() => setLeftTab("chat")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-semibold border-b-2 cursor-pointer transition ${
+            leftTab === "chat"
+              ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100"
+              : "border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          }`}
+        >
+          <MessageSquareIcon size={14} />
+          <span>Chat</span>
+        </button>
+
+        <button
+          onClick={() => setLeftTab("files")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-semibold border-b-2 cursor-pointer transition ${
+            leftTab === "files"
+              ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100"
+              : "border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          }`}
+        >
+          <FolderTreeIcon size={14} />
+          <span>Files</span>
+        </button>
+
+        <button
+          onClick={() => setLeftTab("preview")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-semibold border-b-2 cursor-pointer transition ${
+            leftTab === "preview"
+              ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100"
+              : "border-transparent text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          }`}
+        >
+          <EyeIcon size={14} />
+          <span>Preview</span>
+        </button>
+      </div>
 
       {/* Main Layout Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar */}
-        <div className="w-[320px] shrink-0 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors">
-          {/* Sidebar Tabs */}
-          <div className="flex border-b border-zinc-100 dark:border-zinc-800">
+        <div className={`w-full lg:w-[320px] lg:shrink-0 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors ${
+          leftTab === "preview" ? "hidden lg:flex" : "flex"
+        }`}>
+          {/* Sidebar Tabs (Desktop Only) */}
+          <div className="hidden lg:flex border-b border-zinc-100 dark:border-zinc-800">
             <button
               onClick={() => setLeftTab("chat")}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium cursor-pointer ${
-                leftTab === "chat"
+                leftTab === "chat" || leftTab === "preview"
                   ? "text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100"
                   : "text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
               }`}
@@ -148,28 +188,34 @@ const BuilderPage = () => {
               <FolderTreeIcon size={13} /> Files
             </button>
           </div>
+
           <div className="flex-1 overflow-hidden">
-            {leftTab === "chat" ? (
-              <ChatPanel
-                messages={activeProject.messages || []}
-                onSend={handleChat}
-                loading={chatLoading}
-              />
-            ) : (
+            {leftTab === "files" ? (
               <FileExplorer
                 files={activeProject.files}
                 activeFile={activeFile}
                 onFileSelect={(path) => {
                   setActiveFile(path);
                   setShowCode(true);
+                  if (window.innerWidth < 1024) {
+                    setLeftTab("preview");
+                  }
                 }}
+              />
+            ) : (
+              <ChatPanel
+                messages={activeProject.messages || []}
+                onSend={handleChat}
+                loading={chatLoading}
               />
             )}
           </div>
         </div>
 
         {/* Preview / Code Area */}
-        <div className="flex-1 overflow-hidden">
+        <div className={`flex-1 overflow-hidden ${
+          leftTab === "preview" ? "flex flex-col" : "hidden lg:flex"
+        }`}>
           {activeProject.status === "pending" ||
           activeProject.status === "generating" ||
           activeProject.status === "failed" ? (
@@ -183,7 +229,6 @@ const BuilderPage = () => {
           )}
         </div>
       </div>
-
       {publishUrl && (
         <PublishModal
           publishUrl={publishUrl}
