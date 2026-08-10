@@ -51,46 +51,50 @@ const BuilderHeader = ({
       <div className="flex items-center gap-1.5">
         <button
           onClick={onToggleShowCode}
-          className={`inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition ${
+          className={`inline-flex items-center justify-center gap-1.5 py-1.5 px-2.5 sm:px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition ${
             showCode ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100" : ""
           }`}
+          title={showCode ? "Show Preview" : "Show Code Editor"}
         >
           {showCode ? (
             <>
-              <EyeIcon size={13} /> Preview
+              <EyeIcon size={13} /> <span className="hidden sm:inline">Preview</span>
             </>
           ) : (
             <>
-              <Code2Icon size={13} /> Code
+              <Code2Icon size={13} /> <span className="hidden sm:inline">Code</span>
             </>
           )}
         </button>
 
         <button
           onClick={onOpenPreview}
-          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-2.5 sm:px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
+          title="Open Live Preview"
         >
-          <ExternalLinkIcon size={13} /> Open Preview
+          <ExternalLinkIcon size={13} /> <span className="hidden sm:inline">Open Preview</span>
         </button>
 
         <button
           onClick={onPublish}
           disabled={publishing}
-          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 disabled:opacity-50 transition"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-2.5 sm:px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 disabled:opacity-50 transition"
+          title="Publish Website"
         >
           {publishing ? (
             <Loader2Icon size={13} className="animate-spin" />
           ) : (
             <GlobeIcon size={13} />
           )}
-          Publish
+          <span className="hidden sm:inline">Publish</span>
         </button>
 
         <button
           onClick={onDownload}
-          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-2.5 sm:px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
+          title="Export ZIP"
         >
-          <DownloadIcon size={13} /> Export
+          <DownloadIcon size={13} /> <span className="hidden sm:inline">Export</span>
         </button>
 
         <button
@@ -103,9 +107,10 @@ const BuilderHeader = ({
 
         <button
           onClick={onLogout}
-          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-2.5 sm:px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
+          title="Sign out"
         >
-          <LogOutIcon size={13} /> Signout
+          <LogOutIcon size={13} /> <span className="hidden sm:inline">Signout</span>
         </button>
       </div>
     </header>

@@ -42,18 +42,18 @@ const AuthPage = ({ mode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex text-zinc-900 font-sans">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 flex text-zinc-900 dark:text-zinc-100 font-sans transition-colors">
       {/* Left Panel - Branding */}
       <LoginLeft />
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-8">
         <div className="w-full max-w-sm">
           <div className="mb-10">
-            <h1 className="text-3xl font-medium tracking-tight text-zinc-900 mb-1.5 font-sans">
+            <h1 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-zinc-50 mb-1.5 font-sans">
               {isLogin ? "Sign in" : "Create an account"}
             </h1>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-zinc-400 dark:text-zinc-500">
               {isLogin
                 ? "Enter your credentials to access your website builder."
                 : "Get started by entering your registration details"}
@@ -69,7 +69,7 @@ const AuthPage = ({ mode }) => {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {!isLogin && (
               <div>
-                <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">
+                <label className="block text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">
                   Full Name
                 </label>
                 <input
@@ -77,14 +77,14 @@ const AuthPage = ({ mode }) => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full pl-2 py-2 border-b border-zinc-200 focus:outline-none focus:border-zinc-950 text-sm text-zinc-900 bg-transparent placeholder-zinc-300 transition-colors"
+                  className="w-full pl-2 py-2 border-b border-zinc-200 dark:border-zinc-800 focus:outline-none focus:border-zinc-950 dark:focus:border-zinc-100 text-sm text-zinc-900 dark:text-zinc-50 bg-transparent placeholder-zinc-300 dark:placeholder-zinc-700 transition-colors"
                   placeholder="John Doe"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">
+              <label className="block text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">
                 Email Address
               </label>
               <input
@@ -92,13 +92,13 @@ const AuthPage = ({ mode }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-2 py-2 border-b border-zinc-200 focus:outline-none focus:border-zinc-950 text-sm text-zinc-900 bg-transparent placeholder-zinc-300 transition-colors"
+                className="w-full pl-2 py-2 border-b border-zinc-200 dark:border-zinc-800 focus:outline-none focus:border-zinc-950 dark:focus:border-zinc-100 text-sm text-zinc-900 dark:text-zinc-50 bg-transparent placeholder-zinc-300 dark:placeholder-zinc-700 transition-colors"
                 placeholder="abc@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">
+              <label className="block text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2">
                 Password
               </label>
               <div className="relative">
@@ -107,13 +107,13 @@ const AuthPage = ({ mode }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-2 py-2 border-b border-zinc-200 focus:outline-none focus:border-zinc-950 text-sm text-zinc-900 bg-transparent placeholder-zinc-300 pr-8"
+                  className="w-full pl-2 py-2 border-b border-zinc-200 dark:border-zinc-800 focus:outline-none focus:border-zinc-950 dark:focus:border-zinc-100 text-sm text-zinc-900 dark:text-zinc-50 bg-transparent placeholder-zinc-300 dark:placeholder-zinc-750 pr-8"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-zinc-600 flex items-center justify-center cursor-pointer transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-650 hover:text-zinc-600 dark:hover:text-zinc-300 flex items-center justify-center cursor-pointer transition-colors"
                 >
                   {showPassword ? (
                     <EyeOffIcon size={14} />
@@ -136,13 +136,13 @@ const AuthPage = ({ mode }) => {
             </button>
           </form>
 
-          <p className="text-sm text-zinc-400 mt-8 pt-6 border-t border-zinc-100 font-sans">
+          <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-8 pt-6 border-t border-zinc-100 dark:border-zinc-800/80 font-sans">
             {isLogin ? (
               <>
                 New to AI Web Builder?{" "}
                 <Link
                   to="/register"
-                  className="text-zinc-900 font-medium hover:underline"
+                  className="text-zinc-900 dark:text-zinc-50 font-medium hover:underline"
                 >
                   Create an account
                 </Link>
@@ -152,7 +152,7 @@ const AuthPage = ({ mode }) => {
                 Already have an account?{" "}
                 <Link
                   to="/login"
-                  className="text-zinc-900 font-medium hover:underline"
+                  className="text-zinc-900 dark:text-zinc-50 font-medium hover:underline"
                 >
                   Sign in here
                 </Link>
