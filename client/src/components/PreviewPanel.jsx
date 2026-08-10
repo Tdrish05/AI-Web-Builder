@@ -72,12 +72,13 @@ function SandpackFileWatcher({ onLiveFilesChange }) {
       onLiveFilesChange(updatedFiles);
       updateProjectFiles(updatedFiles);
     }
-  }, [files]);
+  }, [files, onLiveFilesChange, updateProjectFiles]);
 
   return null;
 }
 
 const PreviewPanel = ({ project, activeFile, showCode }) => {
+  const { theme } = useAppContext();
   const [showErrorOverlay, setShowErrorOverlay] = useState(true);
   const [liveFiles, setLiveFiles] = useState(project?.files || {});
 
@@ -147,16 +148,16 @@ const PreviewPanel = ({ project, activeFile, showCode }) => {
         }}
         theme={{
           colors: {
-            surface1: "#ffffff",
-            surface2: "#f4f4f5",
-            surface3: "#e4e4e7",
-            clickable: "#71717a",
-            base: "#09090b",
-            disabled: "#a1a1aa",
-            hover: "#18181b",
-            accent: "#18181b",
+            surface1: theme === "dark" ? "#09090b" : "#ffffff",
+            surface2: theme === "dark" ? "#18181b" : "#f4f4f5",
+            surface3: theme === "dark" ? "#27272a" : "#e4e4e7",
+            clickable: theme === "dark" ? "#a1a1aa" : "#71717a",
+            base: theme === "dark" ? "#f4f4f5" : "#09090b",
+            disabled: theme === "dark" ? "#52525b" : "#a1a1aa",
+            hover: theme === "dark" ? "#fafafa" : "#18181b",
+            accent: theme === "dark" ? "#ef4444" : "#18181b",
             error: "#ef4444",
-            errorSurface: "#fef2f2",
+            errorSurface: theme === "dark" ? "#450a0a" : "#fef2f2",
           },
           font: {
             body: "'Urbanist', system-ui, -apple-system, sans-serif",

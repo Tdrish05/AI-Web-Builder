@@ -139,7 +139,7 @@ const AuthPage = ({ mode }) => {
           <p className="text-sm text-zinc-400 mt-8 pt-6 border-t border-zinc-100 font-sans">
             {isLogin ? (
               <>
-                New to BuilderAI?{" "}
+                New to AI Web Builder?{" "}
                 <Link
                   to="/register"
                   className="text-zinc-900 font-medium hover:underline"

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ArrowRightIcon, CloudUploadIcon, Loader2Icon, MicIcon } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
 
 const PromptInput = ({
   onSubmit,
@@ -33,11 +34,17 @@ const PromptInput = ({
     }
   };
 
+  const { theme } = useAppContext();
+
   if (variant === "glass") {
     return (
       <form
         onSubmit={handleSubmit}
-        className="max-w-2xl w-full bg-white/10 backdrop-blur-xl rounded-xl ring-1 ring-white/25 focus-within:ring-2 focus-within:ring-white/30 overflow-hidden mt-6 transition"
+        className={`max-w-2xl w-full backdrop-blur-xl rounded-xl ring-1 overflow-hidden mt-6 transition duration-200 z-10 relative ${
+          theme === "dark"
+            ? "bg-zinc-950/25 ring-white/20 focus-within:ring-white/40 shadow-2xl shadow-black/45"
+            : "bg-white/75 ring-zinc-200 focus-within:ring-zinc-400 shadow-lg shadow-zinc-300/40"
+        }`}
       >
         <textarea
           ref={textareaRef}
@@ -47,13 +54,21 @@ const PromptInput = ({
           placeholder={placeholder}
           disabled={loading}
           rows={3}
-          className="w-full p-4 pb-2 resize-none placeholder:text-white/60 outline-none bg-transparent text-white text-base"
+          className={`w-full p-4 pb-2 resize-none outline-none bg-transparent text-base transition-colors ${
+            theme === "dark"
+              ? "text-white placeholder:text-white/60"
+              : "text-zinc-800 placeholder:text-zinc-400"
+          }`}
         />
 
         <div className="flex items-center justify-between pb-3 px-3 gap-2">
           <label
             htmlFor="file"
-            className="border border-white/20 text-white/80 hover:text-white hover:border-white/30 p-2 rounded-lg cursor-pointer flex items-center justify-center transition-colors"
+            className={`border p-2 rounded-lg cursor-pointer flex items-center justify-center transition-colors ${
+              theme === "dark"
+                ? "border-white/20 text-white/80 hover:text-white hover:border-white/30"
+                : "border-zinc-200 text-zinc-500 hover:text-zinc-800 hover:border-zinc-300"
+            }`}
           >
             <input type="file" id="file" hidden />
             <CloudUploadIcon size={18} />
@@ -62,7 +77,11 @@ const PromptInput = ({
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"
-              className="flex items-center justify-center p-2 text-white/70 hover:text-white cursor-pointer transition-colors"
+              className={`flex items-center justify-center p-2 cursor-pointer transition-colors ${
+                theme === "dark"
+                  ? "text-white/70 hover:text-white"
+                  : "text-zinc-500 hover:text-zinc-800"
+              }`}
             >
               <MicIcon size={18} />
             </button>

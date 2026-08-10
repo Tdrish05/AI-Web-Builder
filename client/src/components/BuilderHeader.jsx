@@ -8,7 +8,10 @@ import {
   GlobeIcon,
   Loader2Icon,
   LogOutIcon,
+  SunIcon,
+  MoonIcon,
 } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
 
 const BuilderHeader = ({
   projectName,
@@ -22,23 +25,25 @@ const BuilderHeader = ({
   onBack,
   onLogout,
 }) => {
+  const { theme, toggleTheme } = useAppContext();
+
   return (
-    <header className="h-12 shrink-0 flex items-center justify-between px-3 border-b border-zinc-200 bg-white">
+    <header className="h-12 shrink-0 flex items-center justify-between px-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors">
       <div className="flex items-center gap-2">
         <button
           onClick={onBack}
-          className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-950 hover:bg-zinc-100 cursor-pointer transition"
+          className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer transition"
         >
           <ArrowLeftIcon size={16} />
         </button>
 
-        <img src="/logo.svg" alt="logo" className="invert size-5" />
+        <img src="/logo.svg" alt="logo" className="size-5" />
 
-        <span className="text-sm font-semibold truncate max-w-38 md:max-w-50">
+        <span className="text-sm font-semibold truncate max-w-38 md:max-w-50 text-zinc-800 dark:text-zinc-200">
           {projectName || "Untitled Project"}
         </span>
 
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-500 font-medium">
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 font-medium">
           v{version}
         </span>
       </div>
@@ -46,8 +51,8 @@ const BuilderHeader = ({
       <div className="flex items-center gap-1.5">
         <button
           onClick={onToggleShowCode}
-          className={`inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs font-medium rounded-lg cursor-pointer bg-white ${
-            showCode ? "bg-zinc-100 text-zinc-900" : ""
+          className={`inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition ${
+            showCode ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100" : ""
           }`}
         >
           {showCode ? (
@@ -63,7 +68,7 @@ const BuilderHeader = ({
 
         <button
           onClick={onOpenPreview}
-          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs font-medium rounded-lg cursor-pointer bg-white"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
         >
           <ExternalLinkIcon size={13} /> Open Preview
         </button>
@@ -71,7 +76,7 @@ const BuilderHeader = ({
         <button
           onClick={onPublish}
           disabled={publishing}
-          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs font-medium rounded-lg cursor-pointer bg-white disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 disabled:opacity-50 transition"
         >
           {publishing ? (
             <Loader2Icon size={13} className="animate-spin" />
@@ -83,14 +88,22 @@ const BuilderHeader = ({
 
         <button
           onClick={onDownload}
-          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs font-medium rounded-lg cursor-pointer bg-white"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
         >
           <DownloadIcon size={13} /> Export
         </button>
 
         <button
+          onClick={toggleTheme}
+          className="inline-flex items-center justify-center p-1.5 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
+          title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+        >
+          {theme === "light" ? <MoonIcon size={13} /> : <SunIcon size={13} />}
+        </button>
+
+        <button
           onClick={onLogout}
-          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 text-xs font-medium rounded-lg cursor-pointer bg-white"
+          className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs font-medium rounded-lg cursor-pointer bg-white dark:bg-zinc-900 transition"
         >
           <LogOutIcon size={13} /> Signout
         </button>

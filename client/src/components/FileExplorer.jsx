@@ -76,7 +76,7 @@ function TreeItem({ node, activeFile, onFileSelect, depth = 0 }) {
       <div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center gap-1.5 py-1 px-2 text-xs text-zinc-600 hover:text-zinc-900 select-none cursor-pointer font-medium transition-colors"
+          className="w-full flex items-center gap-1.5 py-1 px-2 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 select-none cursor-pointer font-medium transition-colors bg-transparent border-none outline-none"
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
         >
           {isOpen ? (
@@ -112,8 +112,8 @@ function TreeItem({ node, activeFile, onFileSelect, depth = 0 }) {
       onClick={() => onFileSelect(node.path)}
       className={`w-full flex items-center gap-2 py-1.5 px-2 text-xs transition-colors rounded-md cursor-pointer ${
         isActive
-          ? "bg-zinc-100 text-zinc-950 font-semibold"
-          : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+          ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 font-semibold"
+          : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100"
       }`}
       style={{ paddingLeft: `${depth * 12 + 20}px` }}
     >

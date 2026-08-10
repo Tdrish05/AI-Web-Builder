@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { AlertCircleIcon } from 'lucide-react'
-import api from '../api/api'
 import Loading from '../components/Loading'
 import FullPagePreview from '../components/FullPagePreview'
 // Added the missing import below:

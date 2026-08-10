@@ -50,8 +50,40 @@ function getModel() {
   return openrouter(modelName);
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function generateObjectWithRetry(options) {
+  const maxAttempts = 5;
+  let attempt = 0;
+  while (attempt < maxAttempts) {
+    try {
+      return await generateObject(options);
+    } catch (err) {
+      attempt++;
+      const isQuotaError =
+        err.status === 429 ||
+        err.statusCode === 429 ||
+        err.message?.includes("429") ||
+        err.message?.includes("Quota exceeded") ||
+        err.message?.includes("RESOURCE_EXHAUSTED") ||
+        err.message?.includes("rate limit") ||
+        err.message?.includes("Rate limit") ||
+        err.message?.includes("free-models-per-day");
+
+      if (isQuotaError && attempt < maxAttempts) {
+        console.warn(
+          `[AI Retry] Hit rate limit/quota. Retrying in 30 seconds (attempt ${attempt}/${maxAttempts}). Error: ${err.message}`
+        );
+        await sleep(30000);
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
 function getMaxConcurrency() {
-  return parseInt(process.env.AI_MAX_CONCURRENCY || "6", 10);
+  return 1;
 }
 
 // Generate a single file's code
@@ -66,7 +98,7 @@ async function generateSingleFile(
   const userMsg = `Project: ${prompt}\n\nWrite the complete code for: ${file.path}\nPurpose: ${file.description}`;
 
   console.log(`[AI] Creating file: ${file.path}...`);
-  const { object } = await generateObject({
+  const { object } = await generateObjectWithRetry({
     model: getModel(),
     schema: FileCodeSchema,
     system,
@@ -103,7 +135,7 @@ export async function generateProject(prompt, callbacks) {
   console.log(
     `[AI] Phase 1: Planning file structure for: "${prompt.slice(0, 80)}..."`,
   );
-  const { object: plan } = await generateObject({
+  const { object: plan } = await generateObjectWithRetry({
     model: getModel(),
     schema: FilePlanSchema,
     system: FILE_PLAN_SYSTEM,
@@ -154,10 +186,17 @@ export async function generateProject(prompt, callbacks) {
       );
     }
 
+    let fileIndex = 0;
     const results = await pMap(
       pendingFiles,
       async (file) => {
         try {
+          if (fileIndex > 0) {
+            console.log(`[AI Delay] Pausing for 8 seconds before generating ${file.path} to respect rate limits...`);
+            await sleep(8000);
+          }
+          fileIndex++;
+
           if (callbacks?.onFileStart) {
             await callbacks.onFileStart(file.path);
           }
@@ -264,7 +303,7 @@ export async function reviseProject(
 
   console.log("[AI] Revising project...");
 
-  const { object: rawParsed } = await generateObject({
+  const { object: rawParsed } = await generateObjectWithRetry({
     model: getModel(),
     schema: RevisionResultSchema,
     system: REVISE_SYSTEM,

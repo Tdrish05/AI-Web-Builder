@@ -30,12 +30,31 @@ export function AppContextProvider({ children }) {
   const [activeFile, setActiveFile] = useState("/App.js");
   const [showCode, setShowCode] = useState(false);
 
+  // Theme states
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "dark";
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  }, []);
+
   // Auth actions
   const checkSession = useCallback(async () => {
     try {
       const { data } = await api.get("/api/auth/me");
       setUser(data.user);
-    } catch (error) {
+    } catch {
       setUser(null);
     } finally {
       setLoadingUser(false);
@@ -46,7 +65,7 @@ export function AppContextProvider({ children }) {
     checkSession();
   }, [checkSession]);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     try {
       const { data } = await api.post("/api/auth/login", { email, password });
       setUser(data.user);
@@ -58,9 +77,9 @@ export function AppContextProvider({ children }) {
       toast.error(errMsg);
       throw new Error(errMsg);
     }
-  };
+  }, [navigate]);
 
-  const register = async (name, email, password) => {
+  const register = useCallback(async (name, email, password) => {
     try {
       const { data } = await api.post("/api/auth/register", {
         name,
@@ -76,9 +95,9 @@ export function AppContextProvider({ children }) {
       toast.error(errMsg);
       throw new Error(errMsg);
     }
-  };
+  }, [navigate]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await api.post("/api/auth/logout");
       setUser(null);
@@ -90,7 +109,7 @@ export function AppContextProvider({ children }) {
       console.error("Logout failed:", err);
       toast.error("Logout failed");
     }
-  };
+  }, [navigate]);
 
   // Projects Actions
   const loadProjects = useCallback(async () => {
@@ -155,7 +174,9 @@ export function AppContextProvider({ children }) {
 
   // Poll active project status if pending/generating/revising
   useEffect(() => {
-    if (!activeProject?._id || !user) return;
+    if (!activeProject || !user) return;
+    const projectId = activeProject._id || activeProject.id;
+    if (!projectId) return;
 
     const isOngoing =
       activeProject.status === "generating" ||
@@ -165,13 +186,13 @@ export function AppContextProvider({ children }) {
     if (isOngoing) {
       setChatLoading(true);
       const interval = setInterval(() => {
-        loadProject(activeProject._id, true);
+        loadProject(projectId, true);
       }, 2000);
       return () => clearInterval(interval);
     } else {
       setChatLoading(false);
     }
-  }, [activeProject?._id, activeProject?.status, loadProject, user]);
+  }, [activeProject?._id, activeProject?.id, activeProject?.status, loadProject, user]);
 
   const handleGenerate = useCallback(
     async (prompt) => {
@@ -196,11 +217,14 @@ export function AppContextProvider({ children }) {
     async (prompt) => {
       if (!activeProject || !user) return;
 
+      const projectId = activeProject._id || activeProject.id;
+      if (!projectId) return;
+
       setChatLoading(true);
 
       try {
         const { data } = await api.post(
-          `/api/projects/${activeProject._id}/chat`,
+          `/api/projects/${projectId}/chat`,
           { prompt },
         );
 
@@ -251,7 +275,8 @@ export function AppContextProvider({ children }) {
       setActiveProject((prev) => (prev ? { ...prev, files } : prev));
 
       // Save to backend with debounce
-      debouncedSave(files, activeProject._id);
+      const projectId = activeProject._id || activeProject.id;
+      debouncedSave(files, projectId);
     },
     [activeProject, user, debouncedSave],
   );
@@ -279,11 +304,16 @@ export function AppContextProvider({ children }) {
       handleGenerate,
       handleDelete,
       updateProjectFiles,
+      theme,
+      toggleTheme,
       sendChatMessage: handleChat,
     }),
     [
       user,
       loadingUser,
+      login,
+      register,
+      logout,
       projects,
       loadingProjects,
       activeProject,
@@ -296,6 +326,8 @@ export function AppContextProvider({ children }) {
       loadProject,
       handleGenerate,
       updateProjectFiles,
+      theme,
+      toggleTheme,
       handleChat,
     ],
   );

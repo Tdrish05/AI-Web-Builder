@@ -19,7 +19,7 @@ const PublishModal = ({ publishUrl, onClose }) => {
       try {
         document.execCommand("copy");
         toast.success("Public link copied to clipboard!");
-      } catch (err) {
+      } catch {
         toast.error("Failed to copy link");
       }
       document.body.removeChild(textArea);
