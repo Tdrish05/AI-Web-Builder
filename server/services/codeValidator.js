@@ -48,12 +48,21 @@ export function validateAndFixCode(code, filePath, context) {
         warnings.push(`${filePath}: Fixed 'for=' → 'htmlFor='`);
     }
 
+    // Fix corrupted arrow functions (e.g. (e) = /> or (e) = / or (e) = >) before parsing JSX
+    const arrowFixRegex = /(?:\b(e|event|msg|item|idx|index|prev|val|value|data|res|err|error|user|file|p|x|y)|\([^)]*\))\s*=\s*(?:\/>|\/|>\s*\/)\s*(?=[a-zA-Z_{[(])/g;
+    if (arrowFixRegex.test(code)) {
+        code = code.replace(arrowFixRegex, (match, param) => {
+            return `${param || match.match(/^\([^)]*\)/)[0]} => `;
+        });
+        warnings.push(`${filePath}: Fixed corrupted arrow function syntax`);
+    }
+
     // 4. Self-close void elements that aren't self-closed
     for (const tag of VOID_ELEMENTS) {
         // Match <tag ... > that is NOT already self-closed (no / before >)
-        const voidRegex = new RegExp(`<${tag}(\\s[^>]*?)?(?<!/)>`, "gi");
+        const voidRegex = new RegExp(`<${tag}(?:[^>{'"]|"[^"]*"|'[^']*'|{(?:[^{}]|{[^{}]*})*})*(?<!/)>`, "gi");
         if (voidRegex.test(code)) {
-            code = code.replace(new RegExp(`<${tag}(\\s[^>]*?)?(?<!/)>`, "gi"), (match, attrs) => `<${tag}${attrs || ""} />`);
+            code = code.replace(voidRegex, (match) => match.replace(/>$/, " />"));
             warnings.push(`${filePath}: Self-closed <${tag}> elements`);
         }
     }
@@ -149,11 +158,19 @@ export function validateRevisionContent(content, filePath, op) {
 
     // Self-close void elements
     for (const tag of VOID_ELEMENTS) {
-        const voidRegex = new RegExp(`<${tag}(\\s[^>]*?)?(?<!/)>`, "gi");
+        const voidRegex = new RegExp(`<${tag}(?:[^>{'"]|"[^"]*"|'[^']*'|{(?:[^{}]|{[^{}]*})*})*(?<!/)>`, "gi");
         if (voidRegex.test(content)) {
-            content = content.replace(new RegExp(`<${tag}(\\s[^>]*?)?(?<!/)>`, "gi"), (match, attrs) => `<${tag}${attrs || ""} />`);
+            content = content.replace(voidRegex, (match) => match.replace(/>$/, " />"));
             warnings.push(`${filePath}: Self-closed <${tag}> in replacement`);
         }
+    }
+    // Fix corrupted arrow functions (e.g. (e) = /> or (e) = / or (e) = >) in update block
+    const arrowFixRegex = /(?:\b(e|event|msg|item|idx|index|prev|val|value|data|res|err|error|user|file|p|x|y)|\([^)]*\))\s*=\s*(?:\/>|\/|>\s*\/)\s*(?=[a-zA-Z_{[(])/g;
+    if (arrowFixRegex.test(content)) {
+        content = content.replace(arrowFixRegex, (match, param) => {
+            return `${param || match.match(/^\([^)]*\)/)[0]} => `;
+        });
+        warnings.push(`${filePath}: Fixed corrupted arrow function syntax in replacement`);
     }
 
     return { content, warnings };

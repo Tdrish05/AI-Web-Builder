@@ -81,7 +81,7 @@ if(!isValid){
 
   setSessionCookie(res,{userId: user._id.toString(), email:user.email})
   res.status(201).json({
-    message: "User registered successfully",
+    message: "Logged in successfully",
     user: {
       id: user._id,
       name: user.name,

@@ -66,6 +66,8 @@ export async function createProject(req, res) {
 // Background worker to progressive generate files and update database in
 // real-time.
 async function runBackgroundGeneration(projectId, prompt) {
+  let dbQueue = Promise.resolve();
+
   try {
     console.log(`[Background AI] Starting generation for project ${projectId}`);
 
@@ -97,62 +99,83 @@ async function runBackgroundGeneration(projectId, prompt) {
         console.log(
           `[Background AI] Starting file ${path} for project ${projectId}`,
         );
-        await Project.findByIdAndUpdate(projectId, {
-          currentFile: path,
+        dbQueue = dbQueue.then(async () => {
+          await Project.findByIdAndUpdate(projectId, {
+            currentFile: path,
+          });
         });
+        await dbQueue;
       },
       onFileComplete: async (path, code) => {
         console.log(
           `[Background AI] Finished file ${path} for project ${projectId}`,
         );
 
-        const project = await Project.findById(projectId);
+        dbQueue = dbQueue.then(async () => {
+          const project = await Project.findById(projectId);
 
-        if (project) {
-          project.files = project.files || {};
+          if (project) {
+            project.files = project.files || {};
 
-          project.files[path] = {
-            content: code,
-            hash: hashContent(code),
-          };
+            project.files[path] = {
+              content: code,
+              hash: hashContent(code),
+            };
 
-          project.filesGenerated = [...(project.filesGenerated || []), path];
+            project.filesGenerated = [...(project.filesGenerated || []), path];
 
-          project.messages.push({
-            role: "assistant",
-            content: `Created file "${path}"`,
-            timestamp: new Date(),
-          });
+            project.messages.push({
+              role: "assistant",
+              content: `Created file "${path}"`,
+              timestamp: new Date(),
+            });
 
-          project.currentFile = null;
+            project.currentFile = null;
 
-          project.markModified("files");
-          await project.save();
-        }
+            project.markModified("files");
+            await project.save();
+          }
+        });
+        await dbQueue;
       },
     });
 
     console.log(`[Background AI] Successfully generated project ${projectId}`);
 
-    const project = await Project.findById(projectId);
+    dbQueue = dbQueue.then(async () => {
+      const project = await Project.findById(projectId);
 
-    if (project) {
-      project.status = "completed";
-      project.version = 1;
+      if (project) {
+        // Merge generated files and fallbacks from the final result
+        project.files = project.files || {};
+        for (const [path, code] of Object.entries(result.files)) {
+          if (!project.files[path]) {
+            project.files[path] = {
+              content: code,
+              hash: hashContent(code),
+            };
+          }
+        }
 
-      if (result.description) {
-        project.name = result.description;
+        project.status = "completed";
+        project.version = 1;
+
+        if (result.description) {
+          project.name = result.description;
+        }
+
+        project.messages.push({
+          role: "assistant",
+          content:
+            "Website generation complete! You can view and edit the files.",
+          timestamp: new Date(),
+        });
+
+        project.markModified("files");
+        await project.save();
       }
-
-      project.messages.push({
-        role: "assistant",
-        content:
-          "Website generation complete! You can view and edit the files.",
-        timestamp: new Date(),
-      });
-
-      await project.save();
-    }
+    });
+    await dbQueue;
   } catch (err) {
     console.error(
       `[Background AI] Fatal generation error for project ${projectId}:`,
@@ -162,6 +185,8 @@ async function runBackgroundGeneration(projectId, prompt) {
     let friendlyError = err.message || "Failed to generate project";
     if (err.message?.includes("Rate limit exceeded") || err.message?.includes("free-models-per-day")) {
       friendlyError = "OpenRouter daily free quota reached (50 requests/day). Add a free GEMINI_API_KEY from https://aistudio.google.com/ to your server/.env for 1,500 free generations/day!";
+    } else if (err.message?.includes("Quota exceeded") || err.message?.includes("RESOURCE_EXHAUSTED") || err.message?.includes("quota")) {
+      friendlyError = "Google Gemini API quota exceeded (e.g. 20 requests/day limit on pre-release models like gemini-3.6-flash). Please configure a different model or billing tier in your server/.env, or wait for the daily quota reset.";
     }
 
     await Project.findByIdAndUpdate(projectId, {
@@ -224,6 +249,7 @@ export async function getProject(req, res) {
   }
 
   res.json({
+    _id: project._id,
     id: project._id,
     name: project.name,
     description: project.description,
@@ -294,6 +320,7 @@ export async function updateProjectFiles(req, res) {
   }
 
   project.files = newFiles;
+  project.markModified("files");
   await project.save();
 
   const filesObj = {};
@@ -307,6 +334,7 @@ export async function updateProjectFiles(req, res) {
   }
 
   res.json({
+    _id: project._id,
     id: project._id,
     name: project.name,
     description: project.description,

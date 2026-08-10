@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Loader2Icon, MessageSquareIcon, FolderTreeIcon } from "lucide-react";
 import toast from "react-hot-toast";
 
-import Loading from "../components/Loading";
 import BuilderHeader from "../components/BuilderHeader";
 import ChatPanel from "../components/ChatPanel";
 import FileExplorer from "../components/FileExplorer";
@@ -41,7 +40,6 @@ const BuilderPage = () => {
     loadProject(id);
   }, [id, loadProject]);
 
-  // Poll project status if generating
   useEffect(() => {
     if (!id || !activeProject) return;
     if (
@@ -53,7 +51,7 @@ const BuilderPage = () => {
       }, 1500);
       return () => clearInterval(interval);
     }
-  }, [id, loadProject, activeProject?.status]);
+  }, [id, loadProject, activeProject]);
 
   const handleOpenPreview = () => {
     if (!id) return;
@@ -106,10 +104,8 @@ const BuilderPage = () => {
         <p className="text-xs text-zinc-400">Loading project data...</p>
       </div>
     );
-  }
-
-  return (
-    <div className="h-screen flex flex-col bg-white overflow-hidden text-zinc-900 relative">
+  }  return (
+    <div className="h-screen flex flex-col bg-white dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-100 relative transition-colors">
       {/* Top Bar Header */}
       <BuilderHeader
         projectName={activeProject.name || activeProject.prompt}
@@ -127,15 +123,15 @@ const BuilderPage = () => {
       {/* Main Layout Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar */}
-        <div className="w-[320px] shrink-0 flex flex-col border-r border-zinc-200 bg-white">
+        <div className="w-[320px] shrink-0 flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 transition-colors">
           {/* Sidebar Tabs */}
-          <div className="flex border-b border-zinc-100">
+          <div className="flex border-b border-zinc-100 dark:border-zinc-800">
             <button
               onClick={() => setLeftTab("chat")}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium cursor-pointer ${
                 leftTab === "chat"
-                  ? "text-zinc-900 border-b-2 border-zinc-900"
-                  : "text-zinc-400 hover:text-zinc-700"
+                  ? "text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100"
+                  : "text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
               }`}
             >
               <MessageSquareIcon size={13} /> Chat
@@ -145,15 +141,13 @@ const BuilderPage = () => {
               onClick={() => setLeftTab("files")}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium cursor-pointer ${
                 leftTab === "files"
-                  ? "text-zinc-900 border-b-2 border-zinc-900"
-                  : "text-zinc-400 hover:text-zinc-700"
+                  ? "text-zinc-900 dark:text-zinc-100 border-b-2 border-zinc-900 dark:border-zinc-100"
+                  : "text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
               }`}
             >
               <FolderTreeIcon size={13} /> Files
             </button>
           </div>
-
-          {/* Sidebar Content */}
           <div className="flex-1 overflow-hidden">
             {leftTab === "chat" ? (
               <ChatPanel

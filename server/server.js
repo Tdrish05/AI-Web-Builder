@@ -10,7 +10,7 @@ const app = express();
 
 await ConnectToDatabase()
 
-app.use(cors({origin: process.env.ORIGINS.split(","), credentials:true}))
+app.use(cors({origin: (process.env.ORIGINS || "http://localhost:5173,http://localhost:3000").split(","), credentials:true}))
 app.use(cookieParser())
 app.use(express.json())
 app.get("/", (req,res)=> res.send("Server is Live!"))

@@ -220,16 +220,24 @@ Good copy makes design feel premium. Follow these rules:
 - Use \`<nav>\`, \`<main>\`, \`<section>\`, \`<footer>\` semantic HTML elements
 - Add \`id\` attributes to sections for anchor nav (e.g., \`id='features'\`, \`id='pricing'\`)
 
-## CODE CORRECTNESS — MANDATORY RULES
+## CODE CORRECTNESS & SYNTAX INTEGRITY — MANDATORY RULES
 - Every .js component file MUST have exactly ONE default export. E.g., \`export default function Header() { ... }\`
 - Always use \`className\`, NOT \`class\`. Always use \`htmlFor\`, NOT \`for\`.
 - Self-close void HTML elements: <img />, <br />, <hr />, <input />, <link />, <meta />. Never output tags like \`<img>\` or \`<br>\` without the closing slash.
-- Ensure all open JSX tags (like \`<div>\`, \`<section>\`, \`<button>\`, etc.) are fully closed.
+- Ensure all open JSX tags (like \`<div>\`, \`<section>\`, \`<button>\`, etc.) are fully closed, and all braces/parentheses are properly matched.
+- All inline comments inside JSX must strictly use \`{/* comment */}\` formatting to avoid compiler crashes.
 - Never use TypeScript syntax (no interfaces, no types, no \`: React.FC\`, no \`as\`, no \`public/private\`). Output ONLY plain JavaScript/React.
 - Do NOT import packages that aren't react, react-dom, or standard sub-components.
+- Every component, utility, image URL, and icon used must be explicitly imported at the top of the file. No invisible or missing dependencies.
+- Ensure default export names match file import paths exactly across the whole project.
+- Prevent runtime crashes by requiring defensive checks on dynamic data (e.g., \`cart?.length > 0\`, \`items?.map(...)\`).
+- Every \`useState\` hook must be initialized with safe default values (e.g., \`[]\`, \`{\}\`, \`''\`, \`false\`).
 - Every component must return valid JSX wrapped in parentheses: \`return ( <div>...</div> );\`
 - Always import React: \`import React from 'react';\`
-- For event handlers, reference functions that are actually defined in scope, or use inline functions: \`onClick={() => {}}\`.`;
+- For event handlers, reference functions that are actually defined in scope, or use inline functions: \`onClick={() => {}}\`.
+- ALWAYS write arrow functions correctly as \`=>\` (e.g. \`(e) =>\`). NEVER type them as \`= />\` or \`= /\` or \`= >\` or other malformed variations, as this will crash the compiler.
+- NO OMITTED CODE OR PLACEHOLDERS: Explicitly forbid snippets like \`// ... rest of the code\`, \`// TODO\`, or incomplete placeholder markup. Every file must be a 100% complete, fully implemented React component.
+- PRE-OUTPUT SYNTAX VERIFICATION: Before returning the final code object, perform an internal syntax and import verification check. Ensure the code will compile in a React environment without throwing SyntaxError, ReferenceError, or TypeError.`;
 
 export const REVISE_SYSTEM = `${BASE_SYSTEM}
 

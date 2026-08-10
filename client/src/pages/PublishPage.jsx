@@ -49,7 +49,7 @@ const PublishPage = () => {
         </p>
 
         <div className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400">
-          BuilderAI
+          AI Web Builder
         </div>
       </div>
     )
