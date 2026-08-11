@@ -92,17 +92,52 @@ async function generateSingleFile(
   allFiles,
   prompt,
   alreadyGeneratedFiles,
+  uploadedFile = null
 ) {
   const system = buildFileCodeSystem(allFiles, alreadyGeneratedFiles);
 
-  const userMsg = `Project: ${prompt}\n\nWrite the complete code for: ${file.path}\nPurpose: ${file.description}`;
+  let userContent = [
+    {
+      type: "text",
+      text: `Project: ${prompt}\n\nWrite the complete code for: ${file.path}\nPurpose: ${file.description}`
+    }
+  ];
+
+  if (uploadedFile) {
+    const base64Data = uploadedFile.data.split(";base64,").pop();
+    if (uploadedFile.type.startsWith("image/")) {
+      userContent.push({
+        type: "image",
+        image: base64Data,
+        mimeType: uploadedFile.type
+      });
+    } else if (uploadedFile.type === "application/pdf") {
+      const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+      if (geminiKey) {
+        userContent.push({
+          type: "file",
+          data: base64Data,
+          mimeType: "application/pdf"
+        });
+      } else {
+        userContent[0].text += `\n\n[Attached PDF File: ${uploadedFile.name}]`;
+      }
+    } else {
+      try {
+        const text = Buffer.from(base64Data, "base64").toString("utf-8");
+        userContent[0].text += `\n\n[Attached File: ${uploadedFile.name}]\n${text}`;
+      } catch {
+        userContent[0].text += `\n\n[Attached File: ${uploadedFile.name}]`;
+      }
+    }
+  }
 
   console.log(`[AI] Creating file: ${file.path}...`);
   const { object } = await generateObjectWithRetry({
     model: getModel(),
     schema: FileCodeSchema,
     system,
-    prompt: userMsg,
+    messages: [{ role: "user", content: userContent }],
     maxRetries: 2,
   });
 
@@ -130,16 +165,53 @@ async function generateSingleFile(
 }
 
 // Generate project files: plan first, then build files in order with fallback retries
-export async function generateProject(prompt, callbacks) {
+export async function generateProject(prompt, callbacks, uploadedFile = null) {
   // Phase 1: Plan
   console.log(
     `[AI] Phase 1: Planning file structure for: "${prompt.slice(0, 80)}..."`,
   );
+
+  let messages = [];
+  let userContent = [
+    { type: "text", text: `Plan a React website for: ${prompt}` }
+  ];
+
+  if (uploadedFile) {
+    const base64Data = uploadedFile.data.split(";base64,").pop();
+    if (uploadedFile.type.startsWith("image/")) {
+      userContent.push({
+        type: "image",
+        image: base64Data,
+        mimeType: uploadedFile.type
+      });
+    } else if (uploadedFile.type === "application/pdf") {
+      const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+      if (geminiKey) {
+        userContent.push({
+          type: "file",
+          data: base64Data,
+          mimeType: "application/pdf"
+        });
+      } else {
+        userContent[0].text += `\n\n[Attached PDF File: ${uploadedFile.name}]`;
+      }
+    } else {
+      try {
+        const text = Buffer.from(base64Data, "base64").toString("utf-8");
+        userContent[0].text += `\n\n[Attached File: ${uploadedFile.name}]\n${text}`;
+      } catch {
+        userContent[0].text += `\n\n[Attached File: ${uploadedFile.name}]`;
+      }
+    }
+  }
+
+  messages.push({ role: "user", content: userContent });
+
   const { object: plan } = await generateObjectWithRetry({
     model: getModel(),
     schema: FilePlanSchema,
     system: FILE_PLAN_SYSTEM,
-    prompt: `Plan a React website for: ${prompt}`,
+    messages,
     maxRetries: 2,
   });
 
@@ -206,6 +278,7 @@ export async function generateProject(prompt, callbacks) {
             plan.files,
             prompt,
             files,
+            uploadedFile,
           );
 
           if (callbacks?.onFileComplete) {
