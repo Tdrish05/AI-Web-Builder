@@ -140,6 +140,14 @@ export function validateAndFixCode(code, filePath, context) {
         warnings.push(`${filePath}: Escaped contractions inside string literal`);
     }
 
+    // 12. Fix extra single quote after a comma inside string literals
+    // Example: 'Every layout, interaction, 'and color choice...' -> 'Every layout, interaction, and color choice...'
+    const extraQuoteRegex = /(['"])([^'"]*?),\s*['"]([a-zA-Z][^'"]*?\1)/g;
+    if (extraQuoteRegex.test(code)) {
+        code = code.replace(extraQuoteRegex, "$1$2, $3");
+        warnings.push(`${filePath}: Removed extra single quote after comma`);
+    }
+
     return { code: code.trim() + "\n", warnings };
 }
 
