@@ -153,10 +153,10 @@ const HomePage = () => {
                 <Loader2Icon className="animate-spin text-zinc-500" size={20} />
               </div>
             ) : !projects || projects.length === 0 ? (
-              <div className={`text-center py-8 text-sm rounded-xl border ${
+              <div className={`text-center py-8 text-sm rounded-xl border backdrop-blur-md ${
                 theme === "dark"
                   ? "text-white/40 bg-white/5 border-white/10"
-                  : "text-zinc-400 bg-zinc-50 border-zinc-200"
+                  : "text-zinc-400 bg-white/25 border-white/35"
               }`}>
                 No projects created yet.
               </div>
@@ -168,8 +168,8 @@ const HomePage = () => {
                     onClick={() => navigate(`/builder/${project._id}`)}
                     className={`group flex items-center justify-between p-4 backdrop-blur-md border rounded-xl cursor-pointer transition ${
                       theme === "dark"
-                        ? "bg-zinc-950/15 hover:bg-zinc-950/40 border-white/10 hover:border-white/25"
-                        : "bg-white/60 hover:bg-white/80 border-zinc-200/60 hover:border-zinc-300/80 shadow-sm"
+                        ? "bg-white/5 hover:bg-white/10 border-white/10 hover:border-white/20"
+                        : "bg-white/25 hover:bg-white/40 border-white/35 hover:border-white/60 shadow-sm shadow-zinc-300/10"
                     }`}
                   >
                     <div className="flex flex-col text-left">

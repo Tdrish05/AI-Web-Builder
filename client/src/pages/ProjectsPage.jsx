@@ -102,10 +102,10 @@ const ProjectsPage = () => {
             <Loader2Icon className="animate-spin text-zinc-500" size={32} />
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className={`text-center py-20 border rounded-2xl ${
+          <div className={`text-center py-20 border rounded-2xl backdrop-blur-md ${
             theme === "dark"
-              ? "bg-zinc-900/50 border-zinc-800 text-zinc-500"
-              : "bg-white border-zinc-200 text-zinc-400"
+              ? "bg-white/5 border-white/10 text-zinc-550"
+              : "bg-white/25 border-white/35 text-zinc-400"
           }`}>
             <p className="text-sm font-medium">
               {search ? "No projects matched your search." : "You haven't created any projects yet."}
@@ -119,10 +119,10 @@ const ProjectsPage = () => {
                 <div
                   key={project._id}
                   onClick={() => navigate(`/builder/${project._id}`)}
-                  className={`group relative p-5 border rounded-2xl flex flex-col justify-between cursor-pointer transition shadow-sm bg-white dark:bg-zinc-900 hover:shadow-md ${
+                  className={`group relative p-5 border rounded-2xl flex flex-col justify-between cursor-pointer transition shadow-sm backdrop-blur-md hover:shadow-md ${
                     theme === "dark"
-                      ? "border-zinc-850 hover:border-zinc-700 bg-zinc-900/50"
-                      : "border-zinc-200/80 hover:border-zinc-300"
+                      ? "bg-white/5 border-white/10 hover:border-white/20"
+                      : "bg-white/25 border-white/35 hover:border-white/60 shadow-zinc-300/10"
                   }`}
                 >
                   <div className="flex-1 min-w-0">

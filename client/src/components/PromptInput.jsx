@@ -72,13 +72,13 @@ const PromptInput = ({
         onSubmit={handleSubmit}
         className={`max-w-2xl w-full backdrop-blur-xl rounded-xl ring-1 overflow-hidden mt-6 transition duration-200 z-10 relative ${
           theme === "dark"
-            ? "bg-zinc-950/25 ring-white/20 focus-within:ring-white/40 shadow-2xl shadow-black/45"
-            : "bg-white/75 ring-zinc-200 focus-within:ring-zinc-400 shadow-lg shadow-zinc-300/40"
+            ? "bg-white/5 ring-white/10 focus-within:ring-white/25 shadow-2xl shadow-black/40"
+            : "bg-white/30 ring-white/40 focus-within:ring-white/60 shadow-lg shadow-zinc-300/20"
         }`}
       >
         {/* Render Uploaded File Preview */}
         {selectedFile && (
-          <div className="flex items-center gap-3 p-3 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-zinc-50/50 dark:bg-zinc-900/10">
+          <div className="flex items-center gap-3 p-3 border-b border-white/10 dark:border-white/5 bg-white/15 dark:bg-white/5">
             {filePreview ? (
               <img
                 src={filePreview}
