@@ -72,6 +72,9 @@ async function runBackgroundGeneration(projectId, prompt) {
   try {
     console.log(`[Background AI] Starting generation for project ${projectId}`);
 
+    const projectDoc = await Project.findById(projectId);
+    const uploadedFile = projectDoc?.uploadedFile || null;
+
     const result = await generateProject(prompt, {
       onPlan: async (plan) => {
         console.log(
@@ -139,7 +142,7 @@ async function runBackgroundGeneration(projectId, prompt) {
         });
         await dbQueue;
       },
-    });
+    }, uploadedFile);
 
     console.log(`[Background AI] Successfully generated project ${projectId}`);
 
