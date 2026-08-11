@@ -51,11 +51,19 @@ export function AppContextProvider({ children }) {
 
   // Auth actions
   const checkSession = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setUser(null);
+      setLoadingUser(false);
+      return;
+    }
+
     try {
       const { data } = await api.get("/api/auth/me");
       setUser(data.user);
     } catch {
       setUser(null);
+      localStorage.removeItem("token");
     } finally {
       setLoadingUser(false);
     }
@@ -68,6 +76,9 @@ export function AppContextProvider({ children }) {
   const login = useCallback(async (email, password) => {
     try {
       const { data } = await api.post("/api/auth/login", { email, password });
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
       setUser(data.user);
       toast.success("Welcome back!");
       navigate("/");
@@ -86,6 +97,9 @@ export function AppContextProvider({ children }) {
         email,
         password,
       });
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
       setUser(data.user);
       toast.success("Account created successfully!");
       navigate("/");
@@ -100,16 +114,43 @@ export function AppContextProvider({ children }) {
   const logout = useCallback(async () => {
     try {
       await api.post("/api/auth/logout");
+    } catch (err) {
+      console.error("Logout failed on server:", err);
+    } finally {
+      localStorage.removeItem("token");
       setUser(null);
       setProjects([]);
       setActiveProject(null);
       toast.success("Logged out successfully");
       navigate("/login");
-    } catch (err) {
-      console.error("Logout failed:", err);
-      toast.error("Logout failed");
     }
   }, [navigate]);
+
+  const updateProfile = useCallback(async (profileData) => {
+    try {
+      const { data } = await api.put("/api/auth/profile", profileData);
+      setUser(data.user);
+      toast.success("Profile updated successfully!");
+      return data.user;
+    } catch (err) {
+      console.error("Profile update failed:", err);
+      const errMsg = err?.response?.data?.error || "Failed to update profile";
+      toast.error(errMsg);
+      throw new Error(errMsg);
+    }
+  }, []);
+
+  const changePassword = useCallback(async (oldPassword, newPassword) => {
+    try {
+      await api.put("/api/auth/change-password", { oldPassword, newPassword });
+      toast.success("Password changed successfully!");
+    } catch (err) {
+      console.error("Password change failed:", err);
+      const errMsg = err?.response?.data?.error || "Failed to change password";
+      toast.error(errMsg);
+      throw new Error(errMsg);
+    }
+  }, []);
 
   // Projects Actions
   const loadProjects = useCallback(async () => {
@@ -128,32 +169,15 @@ export function AppContextProvider({ children }) {
 
   const loadProject = useCallback(
     async (id, silent = false) => {
-      // FIX: Ensure we don't stay stuck in a loading state if user is missing
-      if (!user) {
-        if (!silent) setLoadingActiveProject(false);
-        return;
-      }
-      
-      if (!silent) setLoadingActiveProject(true);
-
+      if (!user) return;
       try {
+        if (!silent) setLoadingActiveProject(true);
         const { data } = await api.get(`/api/projects/${id}`);
         setActiveProject(data);
-
-        const files = Object.keys(data.files || {});
-        if (files.length > 0) {
-          setActiveFile((prev) => {
-            if (files.includes(prev)) return prev;
-            if (files.includes("/App.js")) return "/App.js";
-            return files[0];
-          });
-        }
       } catch (err) {
-        console.error("Failed to load project:", err);
-        if (!silent) {
-          toast.error("Failed to load project details");
-          navigate("/");
-        }
+        console.error(`Failed to load project ${id}:`, err);
+        toast.error("Failed to load project details");
+        navigate("/");
       } finally {
         if (!silent) setLoadingActiveProject(false);
       }
@@ -161,46 +185,39 @@ export function AppContextProvider({ children }) {
     [navigate, user],
   );
 
-  const handleDelete = async (id) => {
-    try {
-      await api.delete(`/api/projects/${id}`);
-      setProjects((prev) => prev.filter((p) => p._id !== id));
-      toast.success("Project deleted");
-    } catch (err) {
-      console.error("Failed to delete project:", err);
-      toast.error("Failed to delete project");
-    }
-  };
-
-  // Poll active project status if pending/generating/revising
   useEffect(() => {
-    if (!activeProject || !user) return;
-    const projectId = activeProject._id || activeProject.id;
-    if (!projectId) return;
+    if (
+      !activeProject ||
+      activeProject.status === "completed" ||
+      activeProject.status === "failed"
+    ) {
+      setChatLoading(false);
+      return;
+    }
 
-    const isOngoing =
-      activeProject.status === "generating" ||
+    if (
       activeProject.status === "pending" ||
-      activeProject.status === "revising";
-
-    if (isOngoing) {
+      activeProject.status === "generating" ||
+      activeProject.status === "revising"
+    ) {
       setChatLoading(true);
       const interval = setInterval(() => {
-        loadProject(projectId, true);
+        const projId = activeProject._id || activeProject.id;
+        if (projId) loadProject(projId, true);
       }, 2000);
       return () => clearInterval(interval);
     } else {
       setChatLoading(false);
     }
-  }, [activeProject?._id, activeProject?.id, activeProject?.status, loadProject, user]);
+  }, [activeProject?._id, activeProject?.id, activeProject?.status, loadProject]);
 
   const handleGenerate = useCallback(
-    async (prompt) => {
+    async (prompt, uploadedFile = null) => {
       if (!user) return;
 
       setGeneratingProject(true);
       try {
-        const { data } = await api.post("/api/projects", { prompt });
+        const { data } = await api.post("/api/projects", { prompt, uploadedFile });
         toast.success("AI Agent is planning structure...");
         navigate(`/builder/${data.id}`);
       } catch (err) {
@@ -248,40 +265,62 @@ export function AppContextProvider({ children }) {
   );
 
   // Debounced API call for file saving
-  const debouncedSave = useMemo(
+  const debouncedSaveFiles = useMemo(
     () =>
-      debounce(async (files, id) => {
+      debounce(async (projectId, updatedFiles) => {
         try {
-          await api.put(`/api/projects/${id}/files`, { files });
+          await api.put(`/api/projects/${projectId}/files`, {
+            files: updatedFiles,
+          });
         } catch (err) {
-          console.error("Failed to auto-save files:", err);
-          toast.error("Failed to save code modifications");
+          console.error("Autosave failed:", err);
         }
       }, 1000),
     [],
   );
 
-  useEffect(() => {
-    return () => {
-      debouncedSave.flush();
-    };
-  }, [debouncedSave]);
-
   const updateProjectFiles = useCallback(
-    async (files) => {
-      if (!activeProject || !user) return;
+    (filePath, codeContent) => {
+      if (!activeProject) return;
 
-      // Optimistically update local state so UI reacts instantly
-      setActiveProject((prev) => (prev ? { ...prev, files } : prev));
-
-      // Save to backend with debounce
       const projectId = activeProject._id || activeProject.id;
-      debouncedSave(files, projectId);
+      if (!projectId) return;
+
+      const updatedFiles = {
+        ...activeProject.files,
+        [filePath]: codeContent,
+      };
+
+      setActiveProject((prev) => ({
+        ...prev,
+        files: updatedFiles,
+      }));
+
+      debouncedSaveFiles(projectId, updatedFiles);
     },
-    [activeProject, user, debouncedSave],
+    [activeProject, debouncedSaveFiles],
   );
 
-  // Memoize Context Value to prevent unnecessary re-render cascades
+  const handleDelete = useCallback(
+    async (id) => {
+      if (!window.confirm("Are you sure you want to delete this project?"))
+        return;
+      try {
+        await api.delete(`/api/projects/${id}`);
+        setProjects((prev) => prev.filter((p) => p._id !== id));
+        toast.success("Project deleted successfully");
+        if (activeProject && (activeProject._id === id || activeProject.id === id)) {
+          setActiveProject(null);
+          navigate("/");
+        }
+      } catch (err) {
+        console.error("Failed to delete project:", err);
+        toast.error("Failed to delete project");
+      }
+    },
+    [activeProject, navigate],
+  );
+
   const contextValue = useMemo(
     () => ({
       user,
@@ -289,6 +328,8 @@ export function AppContextProvider({ children }) {
       login,
       register,
       logout,
+      updateProfile,
+      changePassword,
       projects,
       loadingProjects,
       activeProject,
@@ -314,6 +355,8 @@ export function AppContextProvider({ children }) {
       login,
       register,
       logout,
+      updateProfile,
+      changePassword,
       projects,
       loadingProjects,
       activeProject,
@@ -325,6 +368,7 @@ export function AppContextProvider({ children }) {
       loadProjects,
       loadProject,
       handleGenerate,
+      handleDelete,
       updateProjectFiles,
       theme,
       toggleTheme,
