@@ -124,6 +124,17 @@ const AuthPage = ({ mode }) => {
               </div>
             </div>
 
+            {isLogin && (
+              <div className="flex justify-end -mt-1">
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-zinc-400 hover:text-zinc-650 hover:underline transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}

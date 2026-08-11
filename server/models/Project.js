@@ -87,6 +87,12 @@ const ProjectSchema = new Schema(
       type: String,
       default: null,
     },
+    uploadedFile: {
+      name: { type: String },
+      size: { type: Number },
+      type: { type: String },
+      data: { type: String },
+    },
   },
   { timestamps: true },
 );

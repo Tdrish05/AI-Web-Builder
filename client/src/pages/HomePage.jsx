@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useAppContext } from "../context/AppContext";
 import PromptInput from "../components/PromptInput";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Trash2Icon, ClockIcon, Loader2Icon, SunIcon, MoonIcon } from "lucide-react";
 
 const homeTags = [
@@ -31,15 +31,14 @@ const timeAgo = (dateStr) => {
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const {
-    user,
     projects,
     loadingProjects,
     generatingProject,
     loadProjects,
     handleGenerate,
     handleDelete,
-    logout,
     theme,
     toggleTheme,
   } = useAppContext();
@@ -48,11 +47,20 @@ const HomePage = () => {
     loadProjects();
   }, [loadProjects]);
 
+  const shouldFocus = searchParams.get("focus") === "true";
+
+  useEffect(() => {
+    if (shouldFocus) {
+      // Clear query parameter to enable subsequent clicks to trigger the effect
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("focus");
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [shouldFocus, searchParams, setSearchParams]);
+
   return (
     <div className={`h-screen overflow-y-scroll font-sans relative transition-colors duration-200 ${
-      theme === "dark"
-        ? "bg-gradient-to-b from-black via-red-950 via-red-800 to-amber-600 text-white"
-        : "bg-gradient-to-b from-[#eae6e1] via-[#ebdcd0] to-[#dfcbb5] text-zinc-900"
+      theme === "dark" ? "text-white" : "text-zinc-900"
     }`}>
       {/* Subtle Grid Pattern for premium aesthetics */}
       <div className="fixed inset-0 bg-[linear-gradient(to_right,var(--grid-color)_1px,transparent_1px),linear-gradient(to_bottom,var(--grid-color)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"
@@ -61,50 +69,27 @@ const HomePage = () => {
         }}
       />
       
-      {/* Nav */}
-      <nav className="sticky top-0 z-10 flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-2">
-          <img src="/logo.svg" alt="logo" className="size-6" />
-          <span className="text-xl font-semibold tracking-tight">
-            AI Web Builder
-          </span>
-        </div>
-        <div className={`flex items-center gap-2 sm:gap-3 text-sm font-medium ${
-          theme === "dark" ? "text-zinc-300" : "text-zinc-700"
-        }`}>
-          <span className="hidden sm:inline">{user?.name}</span>
-
-          <button
-            onClick={toggleTheme}
-            className={`p-1.5 border text-xs rounded-md cursor-pointer bg-transparent transition ${
-              theme === "dark"
-                ? "border-white/20 text-white hover:bg-white/10"
-                : "border-zinc-300 text-zinc-700 hover:bg-zinc-100"
-            }`}
-            title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
-          >
-            {theme === "light" ? <MoonIcon size={14} /> : <SunIcon size={14} />}
-          </button>
-
-          <button
-            onClick={logout}
-            className={`py-1.5 px-3 border text-xs rounded-md cursor-pointer bg-transparent transition ${
-              theme === "dark"
-                ? "border-white/20 text-white hover:bg-white/10"
-                : "border-zinc-300 text-zinc-700 hover:bg-zinc-100"
-            }`}
-          >
-            Sign out
-          </button>
-        </div>
-      </nav>
+      {/* Header theme toggle */}
+      <div className="flex items-center justify-end px-6 py-4 z-10 relative">
+        <button
+          onClick={toggleTheme}
+          className={`p-2 border rounded-lg cursor-pointer bg-transparent transition ${
+            theme === "dark"
+              ? "border-white/20 text-white hover:bg-white/10"
+              : "border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+          }`}
+          title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+        >
+          {theme === "light" ? <MoonIcon size={16} /> : <SunIcon size={16} />}
+        </button>
+      </div>
 
       {/* Hero Container */}
-      <div className="flex flex-col items-center justify-start px-6 pb-20 mt-8 xl:mt-16 relative z-10">
+      <div className="flex flex-col items-center justify-start px-6 pb-20 mt-4 xl:mt-8 relative z-10">
         <div className="w-full max-w-2xl flex flex-col items-center">
 
           {/* Title */}
-          <h1 className="text-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium mt-4 max-w-2xl leading-tight">
+          <h1 className="text-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium mt-4 max-w-2xl leading-tight font-sans">
             Let's build your app together
           </h1>
 
@@ -115,14 +100,14 @@ const HomePage = () => {
             instantly. No coding required.
           </p>
 
-          {/* Prompt input */}
+          {/* Prompt input with auto-focus option */}
           <div className="w-full mt-6">
             <PromptInput
               onSubmit={handleGenerate}
               loading={generatingProject}
               placeholder="Create a portfolio website..."
               variant="glass"
-              autoFocus
+              autoFocus={shouldFocus}
             />
           </div>
 
@@ -175,7 +160,7 @@ const HomePage = () => {
               }`}>
                 No projects created yet.
               </div>
-            ) : (
+            ) : projects.length <= 2 ? (
               <div className="flex flex-col gap-3">
                 {projects.map((project) => (
                   <div
@@ -226,6 +211,20 @@ const HomePage = () => {
                     </button>
                   </div>
                 ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center py-6">
+                <p className={`text-sm mb-4 ${
+                  theme === "dark" ? "text-zinc-400" : "text-zinc-500"
+                }`}>
+                  You have {projects.length} projects created.
+                </p>
+                <button
+                  onClick={() => navigate("/projects")}
+                  className="px-6 py-2.5 bg-gradient-to-br from-red-600 to-amber-600 text-white font-semibold rounded-lg shadow-md cursor-pointer hover:opacity-95 transition-all text-sm"
+                >
+                  View All Projects
+                </button>
               </div>
             )}
           </div>

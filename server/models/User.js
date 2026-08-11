@@ -11,6 +11,11 @@ const UserSchema = new Schema({
     trim: true
   },
   password: { type: String, required: true },
+  profileImage: { type: String, default: "" },
+  bio: { type: String, default: "" },
+  interests: { type: [String], default: [] },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
 }, { timestamps: true })
 
 // Hash password before saving

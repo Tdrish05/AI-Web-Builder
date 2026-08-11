@@ -22,10 +22,10 @@ export async function createProject(req, res) {
     return;
   }
 
-  // Create project in DB immediately with "pending" status
   const project = await Project.create({
     name: "Planning project ... ",
     description: prompt,
+    uploadedFile: req.body.uploadedFile || null,
     files: {},
     messages: [
       { role: "user", content: prompt },
@@ -51,6 +51,7 @@ export async function createProject(req, res) {
     id: project._id,
     name: project.name,
     description: project.description,
+    uploadedFile: project.uploadedFile,
     files: {},
     messages: project.messages,
     version: project.version,
