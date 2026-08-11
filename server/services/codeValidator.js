@@ -126,6 +126,20 @@ export function validateAndFixCode(code, filePath, context) {
         warnings.push(...fixResult.warnings);
     }
 
+    // 10. Fix unclosed/mismatched string literals in arrays/objects
+    const missingOpenQuoteRegex = /(,\s*)([a-zA-Z0-9][a-zA-Z0-9\s.+\-()\/&]{3,150}'(?:\s*,|\s*\]))/g;
+    if (missingOpenQuoteRegex.test(code)) {
+        code = code.replace(missingOpenQuoteRegex, "$1'$2");
+        warnings.push(`${filePath}: Fixed missing opening quote in array`);
+    }
+
+    // 11. Fix unescaped contractions in single-quoted strings (e.g., don't -> don\'t)
+    const contractionRegex = /'([^'\n]+?[a-zA-Z])'([a-zA-Z][^'\n]+?')/g;
+    if (contractionRegex.test(code)) {
+        code = code.replace(contractionRegex, "'$1\\'$2");
+        warnings.push(`${filePath}: Escaped contractions inside string literal`);
+    }
+
     return { code: code.trim() + "\n", warnings };
 }
 
