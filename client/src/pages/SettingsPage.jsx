@@ -39,6 +39,16 @@ const SettingsPage = () => {
 
   const [activeTab, setActiveTab] = useState("profile"); // 'profile' | 'security'
 
+  // Sync state with user context updates
+  React.useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setBio(user.bio || "");
+      setInterestsInput((user.interests || []).join(", "));
+      setProfileImage(user.profileImage || "");
+    }
+  }, [user]);
+
   // Convert uploaded image to base64
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
