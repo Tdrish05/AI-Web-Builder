@@ -114,8 +114,8 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className={`h-screen overflow-y-auto font-sans p-6 md:p-10 transition-colors duration-200 ${
-      theme === "dark" ? "bg-zinc-950 text-white" : "bg-zinc-50 text-zinc-900"
+    <div className={`h-screen overflow-y-auto font-sans p-6 md:p-10 transition-colors duration-200 bg-transparent ${
+      theme === "dark" ? "text-white" : "text-zinc-900"
     }`}>
       {/* Subtle Grid Background */}
       <div

@@ -3,8 +3,10 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { StarIcon, Loader2Icon, CheckCircleIcon, ArrowLeftIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAppContext } from "../context/AppContext";
 
 const ResetPasswordPage = () => {
+  const { theme } = useAppContext();
   const { token } = useParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
@@ -38,7 +40,11 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen font-sans bg-zinc-950 text-white relative">
+    <div className={`flex h-screen w-screen font-sans relative transition-colors duration-200 ${
+      theme === "dark"
+        ? "bg-gradient-to-b from-black via-red-950 via-red-800 to-amber-600 text-white"
+        : "bg-gradient-to-b from-[#eae6e1] via-[#ebdcd0] to-[#dfcbb5] text-zinc-900"
+    }`}>
       {/* Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0" />
 
