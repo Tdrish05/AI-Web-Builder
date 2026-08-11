@@ -155,7 +155,11 @@ export function SidebarLayout() {
       </aside>
 
       {/* Main Panel Content */}
-      <main className="flex-1 overflow-hidden relative">
+      <main className={`flex-1 overflow-hidden relative transition-colors duration-200 ${
+        theme === "dark"
+          ? "bg-gradient-to-b from-black via-red-950 via-red-800 to-amber-600 text-white"
+          : "bg-gradient-to-b from-[#eae6e1] via-[#ebdcd0] to-[#dfcbb5] text-zinc-900"
+      }`}>
         <Outlet />
       </main>
     </div>
