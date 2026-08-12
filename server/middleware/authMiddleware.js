@@ -1,5 +1,4 @@
-import jwt from "jsonwebtoken"; // <-- THIS WAS MISSING!
-
+import jwt from "jsonwebtoken"; 
 export function authMiddleware(req, res, next) {
   let token = req.cookies?.token;
 
