@@ -190,7 +190,7 @@ async function runBackgroundGeneration(projectId, prompt) {
     if (err.message?.includes("Rate limit exceeded") || err.message?.includes("free-models-per-day")) {
       friendlyError = "OpenRouter daily free quota reached (50 requests/day). Add a free GEMINI_API_KEY from https://aistudio.google.com/ to your server/.env for 1,500 free generations/day!";
     } else if (err.message?.includes("Quota exceeded") || err.message?.includes("RESOURCE_EXHAUSTED") || err.message?.includes("quota")) {
-      friendlyError = "Google Gemini API quota exceeded (e.g. 20 requests/day limit on pre-release models like gemini-3.6-flash). Please configure a different model or billing tier in your server/.env, or wait for the daily quota reset.";
+      friendlyError = "Google Gemini API quota exceeded. Please configure a different model or billing tier in your server/.env, or wait for the daily quota reset.";
     }
 
     await Project.findByIdAndUpdate(projectId, {

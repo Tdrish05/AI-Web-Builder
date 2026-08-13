@@ -29,7 +29,7 @@ function getModel() {
     const googleProvider = createGoogle({
       apiKey: geminiKey,
     });
-    const modelName = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+    const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
     return googleProvider(modelName);
   }
 
