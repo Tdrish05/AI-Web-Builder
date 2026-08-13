@@ -103,7 +103,7 @@ async function generateSingleFile(
     }
   ];
 
-  if (uploadedFile) {
+  if (uploadedFile && uploadedFile.data) {
     const base64Data = uploadedFile.data.split(";base64,").pop();
     if (uploadedFile.type.startsWith("image/")) {
       userContent.push({
@@ -176,7 +176,7 @@ export async function generateProject(prompt, callbacks, uploadedFile = null) {
     { type: "text", text: `Plan a React website for: ${prompt}` }
   ];
 
-  if (uploadedFile) {
+  if (uploadedFile && uploadedFile.data) {
     const base64Data = uploadedFile.data.split(";base64,").pop();
     if (uploadedFile.type.startsWith("image/")) {
       userContent.push({
